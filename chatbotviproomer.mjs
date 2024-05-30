@@ -1,13 +1,17 @@
 import express from 'express';
 import axios from 'axios';
 import qs from 'qs';
-import 'dotenv/config';
-//import dotenv from 'dotenv';
-// Cargar las variables de entorno desde el archivo .env
-//dotenv.config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 app.use(express.json());
+
+
+console.log('Loaded environment variables:', process.env);
+
+// Verificar si la variable de entorno se ha cargado
+console.log(`WUBOOK_API_KEY IS: ${process.env.WUBOOK_API_KEY}`);
 
 const calculateDaysBetween = (arrival, departure) => {
     const [dayA, monthA, yearA] = arrival.split('/');
@@ -32,14 +36,14 @@ app.post('/fetch_wubook_data', async (req, res) => {
     const rate_id = 37166;
     const images_url = "https://candallarq57078.ipage.com/images/";
 
+    console.log(`Incoming request with arrival: ${arrival}, departure: ${departure}`);
+    console.log(`Configured headers with API Key:`, headers);
+
     try {
         // Fetch products and availability in parallel
         const [responseProducts, responseAvailability] = await Promise.all([
             axios.post(`${base_url}/property/fetch_products`, {}, { headers }),
-            axios.post(`${base_url}/inventory/fetch_rooms_availability`, qs.stringify({
-                arrival,
-                departure
-            }), { headers })
+            axios.post(`${base_url}/inventory/fetch_rooms_availability`, qs.stringify({ arrival, departure }), { headers })
         ]);
 
         const productsData = responseProducts.data.data || [];
@@ -107,7 +111,7 @@ app.post('/fetch_wubook_data', async (req, res) => {
 const convertirFecha = (fechaString) => {
     const partes = fechaString.split("/");
     const dia = parseInt(partes[0], 10);
-    const mes = parseInt(partes[1], 10) - 1; 
+    const mes = parseInt(partes[1], 10) - 1;
     const anio = parseInt(partes[2], 10);
     const fecha = new Date(anio, mes, dia);
     if (fecha.getDate() !== dia || fecha.getMonth() !== mes || fecha.getFullYear() !== anio) {
@@ -129,7 +133,7 @@ const esFechaValidaYMayorQueHoy = (data) => {
 
 const esDepartureMayorQueArrival = (data) => {
     const { arrivalString, departureString } = data;
-    
+
     if (!/^\d{2}\/\d{2}\/\d{4}$/.test(arrivalString) || !/^\d{2}\/\d{2}\/\d{4}$/.test(departureString)) {
         return false;
     }
