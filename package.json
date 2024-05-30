@@ -1,0 +1,39 @@
+{
+  "name": "testwubookdata",
+  "version": "1.0.0",
+  "description": "Una aplicación que interactúa con WuBook y Roomer API.",
+  "main": "chatbotviproomer.mjs",
+  "scripts": {
+    "start": "node chatbotviproomer.mjs",
+    "dev": "nodemon chatbotviproomer.mjs",
+    "test": "echo \"Error: no hay pruebas especificadas\" && exit 1"
+  },
+  "keywords": [
+    "wubook",
+    "roomer",
+    "api",
+    "chatbot"
+  ],
+  "author": "Federico Aldao",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "moment": "^2.30.1",
+    "moments": "^0.0.2",
+    "openai": "^4.0.0",
+    "qs": "^6.12.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/faldao/testwubookdata.git"
+  },
+  "bugs": {
+    "url": "https://github.com/faldao/testwubookdata/issues"
+  },
+  "homepage": "https://github.com/faldao/testwubookdata#readme"
+}

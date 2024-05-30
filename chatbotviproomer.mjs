@@ -1,6 +1,10 @@
 import express from 'express';
 import axios from 'axios';
 import qs from 'qs';
+import 'dotenv/config';
+//import dotenv from 'dotenv';
+// Cargar las variables de entorno desde el archivo .env
+//dotenv.config();
 
 const app = express();
 app.use(express.json());
@@ -20,7 +24,7 @@ app.post('/fetch_wubook_data', async (req, res) => {
     }
 
     const headers = {
-        'x-api-key': 'wb_9572f852-b76b-11ec-a538-001a4ae7b219',
+        'x-api-key': process.env.WUBOOK_API_KEY,
         'Content-Type': 'application/x-www-form-urlencoded'
     };
 
@@ -71,13 +75,12 @@ app.post('/fetch_wubook_data', async (req, res) => {
                         console.log(`Rates for product ${product.id}:`, rateResponse.data);
                         const rateData = rateResponse.data.data[product.id];
                         const totalRate = rateData ? Math.round(rateData.reduce((acc, rate) => acc + rate.p, 0)) : 0;
-                        //let totalRateFixed = totalRate.Fixed(2);
                         return {
                             product_id: product.id,
                             room_type_id: product.id_zak_room_type,
                             product_name: product.name,
                             short_room_name: product.srname,
-			    room_name: product.rname,
+                            room_name: product.rname,
                             room_image_url: `${images_url}${product.id_zak_property}_${product.srname}.jpg`,
                             totalRate: `${totalRate} USD`,
                             availableRooms: availabilityData[roomTypeId].rooms
@@ -101,11 +104,10 @@ app.post('/fetch_wubook_data', async (req, res) => {
     }
 });
 
-// Función auxiliar para convertir una fecha en string a objeto Date
 const convertirFecha = (fechaString) => {
     const partes = fechaString.split("/");
     const dia = parseInt(partes[0], 10);
-    const mes = parseInt(partes[1], 10) - 1; // Ajuste porque los meses en JS son 0-indexados
+    const mes = parseInt(partes[1], 10) - 1; 
     const anio = parseInt(partes[2], 10);
     const fecha = new Date(anio, mes, dia);
     if (fecha.getDate() !== dia || fecha.getMonth() !== mes || fecha.getFullYear() !== anio) {
@@ -114,7 +116,6 @@ const convertirFecha = (fechaString) => {
     return fecha;
 };
 
-// Función para validar que la fecha es válida y mayor que hoy
 const esFechaValidaYMayorQueHoy = (data) => {
     const fechaString = data.fechaString;
     const fecha = convertirFecha(fechaString);
@@ -126,21 +127,16 @@ const esFechaValidaYMayorQueHoy = (data) => {
     return fecha > hoy ? "verdadero" : "falso";
 };
 
-
-// Funcion para validar que la fecha de salida es mayor que la fecha de llegada
 const esDepartureMayorQueArrival = (data) => {
     const { arrivalString, departureString } = data;
     
-    // Validar el formato de las fechas
     if (!/^\d{2}\/\d{2}\/\d{4}$/.test(arrivalString) || !/^\d{2}\/\d{2}\/\d{4}$/.test(departureString)) {
         return false;
     }
 
-    // Convertir las fechas de string a objetos Date
     const arrivalDate = convertirFecha(arrivalString);
     const departureDate = convertirFecha(departureString);
 
-    // Verificar si las fechas son validas y si departure es mayor que arrival
     if (!arrivalDate || !departureDate || departureDate <= arrivalDate) {
         return false;
     }
@@ -148,13 +144,11 @@ const esDepartureMayorQueArrival = (data) => {
     return true;
 };
 
-// Ruta para validar si una fecha es válida y mayor que hoy
 app.post('/validate_date', (req, res) => {
     const result = esFechaValidaYMayorQueHoy(req.body);
     res.json({ valid: result });
 });
 
-// Ruta para validar que la fecha de salida es mayor que la fecha de llegada
 app.post('/validate_dates', (req, res) => {
     const isValid = esDepartureMayorQueArrival(req.body);
     res.json({ valid: isValid });
